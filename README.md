@@ -13,3 +13,5 @@ python twiggy.py tweets.txt time
 or
 <br>
 python twiggy.py tweets.txt notime
+
+Remember to edit with your keys the files: consumer.py and access.py
