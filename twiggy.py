@@ -3,46 +3,45 @@
 import datetime
 import sys
 import time
+
 import tweepy
 
-from consumer import CONSUMER_KEY, CONSUMER_SECRET
 from access import ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from consumer import CONSUMER_KEY, CONSUMER_SECRET
 
-# lettura parametri riga di comando
+# Read CLI parameters
 argfile = str(sys.argv[1])
 argmode = str(sys.argv[2])
 
-# autenticazione twitter
+# Twitter authentication
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-# apro il file di testo
-filename=open(argfile,'r')
-f=filename.readlines()
+# Open text file
+filename = open(argfile, 'r')
+f = filename.readlines()
 filename.close()
 
-# todo controllo lunghezza
+# TODO: check messages length
 
-# per ogni riga del file...
 for line in f:
-    # dalla linea prendo la data e il testo
+    # Take date and tweet
     thyme, text = line.split(' ', 1)
-    
-    # controllo il tempo
+
+    # If time check is active
     if (argmode == "time"):
         time_from_text = datetime.datetime.strptime(thyme, '%Y-%m-%d_%H:%M')
-        # se non è ancora arrivata la sua ora, aspetta...
+        # Wait until is not his time
         while (time_from_text > datetime.datetime.now()):
             time.sleep(60)
-        #print text
+        # Send tweet
         api.update_status(status=text)
 
-    # se non controllo il tempo stampo il tweet
+    # If not time check is active
     else:
-        #print text
+        # Send tweet
         api.update_status(status=text)
 
-    # in entrambi i casi aspetto 15 minuti
+    # Anyway after send tweet wait for 15 mins
     time.sleep(900)
-    
