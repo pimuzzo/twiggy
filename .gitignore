@@ -1,1 +1,4 @@
 *.pyc
+.idea
+access.py
+consumer.py
