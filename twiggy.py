@@ -1,47 +1,51 @@
 # -*- coding: utf-8 -*-
-
 import datetime
+import logging
 import sys
 import time
 
+import click
 import tweepy
 
-from access import ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-from consumer import CONSUMER_KEY, CONSUMER_SECRET
+from config import LEVEL, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 
-# Read CLI parameters
-argfile = str(sys.argv[1])
-argmode = str(sys.argv[2])
 
-# Twitter authentication
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
+@click.command()
+@click.option('--source', help='The source file of the tweets', required=True)
+@click.option('--mode', help='Choose time only if your source uses time', required=True, type=click.Choice(['time', 'notime']))
+def main(source, mode):
+    # Twitter authentication
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    logging.info('Authentication completed')
 
-# Open text file
-filename = open(argfile, 'r')
-f = filename.readlines()
-filename.close()
+    # Read text file
+    filename = open(source, 'r')
+    f = filename.readlines()
+    filename.close()
+    logging.info('Source file read')
 
-# TODO: check messages length
+    # TODO: check messages length
 
-for line in f:
-    # Take date and tweet
-    thyme, text = line.split(' ', 1)
+    for line in f:
+        tweet_time, tweet_text = line.split(' ', 1)
 
-    # If time check is active
-    if (argmode == "time"):
-        time_from_text = datetime.datetime.strptime(thyme, '%Y-%m-%d_%H:%M')
-        # Wait until is not his time
-        while (time_from_text > datetime.datetime.now()):
+        # Time check
+        if mode == 'time':
+            time_from_text = datetime.datetime.strptime(tweet_time, '%Y-%m-%d_%H:%M')
+        else:
+            time_from_text = datetime.datetime.strptime(tweet_time, '%Y-%m-%d')
+        while time_from_text > datetime.datetime.now():
             time.sleep(60)
-        # Send tweet
-        api.update_status(status=text)
 
-    # If not time check is active
-    else:
         # Send tweet
-        api.update_status(status=text)
+        api.update_status(status=tweet_text)
+        logging.info('Sent {}'.format(tweet_text))
+        time.sleep(60)
 
-    # Anyway after send tweet wait for 15 mins
-    time.sleep(900)
+
+if __name__ == '__main__':
+    log_format = '%(asctime)s - %(levelname)s - %(message)s'
+    logging.basicConfig(stream=sys.stdout, level=LEVEL, format=log_format)
+    main()
