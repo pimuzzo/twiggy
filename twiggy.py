@@ -33,10 +33,10 @@ def main(source, mode):
 
         # Time check
         if mode == 'time':
-            time_from_text = datetime.datetime.strptime(tweet_time, '%Y-%m-%d_%H:%M')
+            date_from_text = datetime.datetime.strptime(tweet_time, '%Y-%m-%d_%H:%M')
         else:
-            time_from_text = datetime.datetime.strptime(tweet_time, '%Y-%m-%d')
-        while time_from_text > datetime.datetime.now():
+            date_from_text = datetime.datetime.strptime(tweet_time, '%Y-%m-%d')
+        while date_from_text > datetime.datetime.now():
             time.sleep(60)
 
         # Send tweet
